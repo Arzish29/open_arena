@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScreamLeap - Voice-Controlled Chicken Adventure</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main id="game">
+        <header class="topbar">
+            <div class="brand">
+                <span class="logo">🐔</span>
+                <div>
+                    <h1>ScreamLeap</h1>
+                    <p>VOICE-CONTROLLED CHICKEN ADVENTURE</p>
+                </div>
+            </div>
+            <div class="score-panel">
+                <div><span>SCORE</span><strong id="score">0</strong></div>
+                <div><span>BEST</span><strong id="best">0</strong></div>
+            </div>
+        </header>
+
+        <section class="game-area">
+            <canvas id="gameCanvas"></canvas>
+            <div id="welcome" class="overlay">
+                <div class="welcome-card">
+                    <div class="hero-chicken">🐥</div>
+                    <h2>Ready to ScreamLeap?</h2>
+                    <p>Use your voice to launch your chicken into the sky!</p>
+                    <div class="instructions">
+                        <span>🔊</span>
+                        <div><b>Speak or shout</b><small>Louder voice = stronger jump</small></div>
+                    </div>
+                    <div class="instructions">
+                        <span>🎵</span>
+                        <div><b>Change your pitch</b><small>Higher pitch = higher jump</small></div>
+                    </div>
+                    <button id="startButton">START ADVENTURE</button>
+                    <button id="micButton" class="secondary">🎙 ENABLE MICROPHONE</button>
+                    <p id="micStatus" class="status">Microphone not enabled</p>
+                    <small class="hint">You can also press SPACE or click JUMP.</small>
+                </div>
+            </div>
+            <div id="gameOver" class="overlay hidden">
+                <div class="welcome-card">
+                    <div class="hero-chicken">🐔</div>
+                    <h2>Egg-cellent Effort!</h2>
+                    <p>Your score: <strong id="finalScore">0</strong></p>
+                    <button id="restartButton">PLAY AGAIN</button>
+                </div>
+            </div>
+            <div class="hud">
+                <div class="voice-panel">
+                    <span>🎙 VOICE POWER</span>
+                    <div class="meter"><div id="voiceLevel"></div></div>
+                    <small id="voiceText">Waiting for your voice...</small>
+                </div>
+                <button id="jumpButton">🐥 JUMP!</button>
+                <button id="fullscreenButton" title="Toggle fullscreen">⛶</button>
+            </div>
+        </section>
+        <footer>USE YOUR VOICE • DODGE OBSTACLES • COLLECT GOLDEN EGGS</footer>
+    </main>
+    <script src="game.js"></script>
+</body>
+</html>
