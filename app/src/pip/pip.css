@@ -1,0 +1,224 @@
+/* Pip: fixed bottom-right guide bot. Mini-CRT panel, square corners, crisp text. */
+.pip {
+  --pip-r: max(16px, env(safe-area-inset-right));
+  --pip-b: max(16px, env(safe-area-inset-bottom));
+  position: fixed;
+  z-index: 100;
+  right: var(--pip-r);
+  bottom: var(--pip-b);
+  font-family: var(--f-body);
+}
+.pip-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+.pip-btn:focus-visible { outline: 2px solid var(--coin); outline-offset: 4px; }
+.pip-body {
+  display: block;
+  width: 56px;
+  height: 56px;
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 0 8px rgba(255, 225, 74, 0.55)) drop-shadow(0 0 2px #000);
+  will-change: transform;
+}
+.pip-body canvas,
+.pip-head canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+.pip-shadow {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: -4px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 10px rgba(255, 225, 74, 0.25);
+  pointer-events: none;
+}
+.pip-bubble {
+  position: absolute;
+  right: 6px;
+  bottom: 76px;
+  padding: 6px 10px 4px;
+  white-space: nowrap;
+  border: 3px solid #000;
+  box-shadow: inset 0 0 0 2px var(--line2);
+  background: #0a0418;
+  color: var(--coin);
+  font: 400 20px/1 var(--f-crt);
+}
+.pip-bubble::after {
+  content: "";
+  position: absolute;
+  right: 22px;
+  bottom: -9px;
+  width: 12px;
+  height: 6px;
+  background: #000;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+.pip-bubble[hidden] { display: none; }
+
+.pip-panel {
+  position: fixed;
+  right: var(--pip-r);
+  bottom: calc(var(--pip-b) + 76px);
+  width: min(380px, calc(100vw - 32px));
+  height: min(560px, 80dvh);
+  display: flex;
+  flex-direction: column;
+  border: 4px solid #000;
+  box-shadow: inset 0 0 0 3px var(--line2), 0 0 0 1px #24114f, 0 18px 60px rgba(0, 0, 0, 0.6), 0 0 40px -12px var(--coin);
+  /* Scanlines are part of the background, under the text, so the text stays crisp. */
+  background:
+    repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+    #07040f;
+  color: var(--fg);
+}
+.pip-panel[hidden] { display: none; }
+.pip-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px 10px 14px;
+  border-bottom: 2px solid var(--line2);
+}
+.pip-head canvas { width: 28px; height: 28px; flex: none; }
+.pip-head h2 { flex: 1; margin: 0; font: 400 26px/1 var(--f-display); letter-spacing: 0.04em; color: var(--coin); }
+.pip-icon {
+  min-width: 36px;
+  height: 32px;
+  padding: 0 8px;
+  border: 2px solid #000;
+  box-shadow: inset 0 0 0 2px var(--line2);
+  background: #12062a;
+  color: var(--fg);
+  font: 400 18px/1 var(--f-crt);
+  cursor: pointer;
+}
+.pip-icon:hover { background: var(--coin); color: #1a0f00; }
+.pip-log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.pip-msg { max-width: 92%; padding: 8px 12px 10px; }
+.pip-msg.bot { align-self: flex-start; background: #12062a; border: 1px solid #24114f; }
+.pip-msg.me { align-self: flex-end; border: 2px solid var(--cyan); }
+.pip-msg.err { border-color: var(--pink); }
+.pip-who { display: block; margin-bottom: 2px; font: 400 16px/1 var(--f-crt); letter-spacing: 0.08em; color: var(--coin); }
+.pip-msg.me .pip-who { color: var(--cyan); text-align: right; }
+.pip-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.pip-cur { display: inline-block; width: 0.55em; height: 1em; margin-left: 2px; vertical-align: -0.12em; background: var(--coin); animation: blink 1s steps(1) infinite; }
+.pip-dots { display: inline-flex; gap: 5px; padding: 6px 0; }
+.pip-dots i { width: 6px; height: 6px; background: var(--coin); animation: pipdot 1s steps(1) infinite; }
+.pip-dots i:nth-child(2) { animation-delay: 0.2s; }
+.pip-dots i:nth-child(3) { animation-delay: 0.4s; }
+@keyframes pipdot { 0%, 100% { opacity: 0.25; } 30% { opacity: 1; } }
+.pip-src { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.pip-chip {
+  padding: 2px 8px 1px;
+  border: 1px solid var(--k);
+  background: none;
+  color: var(--k);
+  font: 400 17px/1.2 var(--f-crt);
+  cursor: pointer;
+}
+.pip-chip[aria-expanded="true"] { background: var(--k); color: #050212; }
+.pip-snip {
+  flex-basis: 100%;
+  margin: 0;
+  padding: 6px 10px;
+  border-left: 3px solid var(--line2);
+  background: #07040f;
+  color: var(--soft);
+  font-size: 14px;
+  white-space: pre-wrap;
+}
+.pip-nosrc {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 2px 8px 1px;
+  border: 1px dashed var(--mute);
+  color: var(--mute);
+  font: 400 16px/1.2 var(--f-crt);
+}
+.pip-retry {
+  margin-top: 8px;
+  padding: 5px 14px 3px;
+  border: 2px solid #000;
+  box-shadow: inset 0 0 0 2px var(--line2);
+  background: var(--pink);
+  color: #050212;
+  font: 400 20px/1 var(--f-display);
+  cursor: pointer;
+}
+.pip-chips { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.pip-suggest {
+  padding: 6px 10px;
+  border: 1px solid var(--line2);
+  background: #0a0418;
+  color: var(--fg);
+  font: 500 14px/1.3 var(--f-body);
+  text-align: left;
+  cursor: pointer;
+}
+.pip-suggest:hover { border-color: var(--coin); color: var(--coin); }
+.pip-form { display: flex; gap: 8px; padding: 10px; border-top: 2px solid var(--line2); }
+.pip-form textarea {
+  flex: 1;
+  min-height: 40px;
+  max-height: 120px;
+  padding: 8px 10px;
+  border: 2px solid var(--line2);
+  background: #0a0418;
+  color: var(--fg);
+  font: 400 15px/1.4 var(--f-body);
+  resize: none;
+}
+.pip-form textarea:focus { outline: none; border-color: var(--coin); }
+.pip-send {
+  padding: 0 14px;
+  border: 2px solid #000;
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.3);
+  background: var(--coin);
+  color: #1a0f00;
+  font: 400 22px/1 var(--f-display);
+  cursor: pointer;
+}
+.pip-send.stop { background: var(--pink); color: #050212; }
+.pip-panel button:focus-visible,
+.pip-form textarea:focus-visible { outline: 2px solid var(--coin); outline-offset: 2px; }
+.pip-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+@media (max-width: 600px) {
+  .pip-panel {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 85dvh;
+    border-bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pip-cur, .pip-dots i { animation: none; }
+}
