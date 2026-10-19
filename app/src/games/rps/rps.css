@@ -1,0 +1,27 @@
+/* Fallback move buttons: always there, so the game works without a camera. */
+.rps-pad {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: 4%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+.rps-pad button {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 84px;
+  padding: 6px 10px 4px;
+  border: 3px solid #000;
+  box-shadow: inset 0 0 0 2px var(--line2);
+  background: rgba(18, 6, 42, 0.9);
+  color: var(--cyan);
+  font: 400 clamp(16px, 2.2vw, 22px) / 1 var(--f-crt);
+  cursor: pointer;
+}
+.rps-pad button b { font-weight: 400; color: var(--coin); }
+.rps-pad button:hover,
+.rps-pad button.on { background: var(--cyan); color: #050212; }
+.rps-pad button:focus-visible { outline: 2px solid var(--coin); outline-offset: 3px; }
