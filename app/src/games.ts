@@ -124,6 +124,32 @@ export const GAMES: Game[] = [
     troubleshooting: CAMERA_HELP,
   },
   {
+    slug: 'bottle-blast',
+    title: 'Bottle Blast',
+    input: 'hand',
+    players: '1 player',
+    color: INPUT_META.hand.color,
+    shortDescription: 'Aim with your index fingertip and shoot bottles.',
+    rules: [
+      'Move your index fingertip to aim at the bottles.',
+      'Point with your index finger to shoot.',
+      'Hit bottles to earn 100 points each before the 60-second timer ends.',
+    ],
+    controls: [
+      'Hand: aim with your index fingertip and point to shoot.',
+      'Keyboard: arrow keys or WASD to aim, Space to shoot.',
+    ],
+    scoring: 'Earn 100 points for every bottle hit.',
+    tips: [
+      'Keep your hand visible to the camera.',
+      'Aim at the centre of each bottle.',
+      'Use the keyboard if hand tracking is unavailable.',
+    ],
+    needs: 'camera',
+    troubleshooting: CAMERA_HELP,
+  },
+
+  {
     slug: 'scream-chicken',
     title: 'Scream Chicken',
     input: 'voice',

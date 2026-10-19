@@ -205,12 +205,57 @@ var duel=(function(){
 })();
 
 /* ---- game data ---- */
-var DEMOS={'rail-rush':rail,'hill-climb':hill,'rps':rps,'scream-chicken':chick,'quiz-battle':duel};
-var LIST=GAMES.map(function(G){
-  var m=INPUT_META[G.input];
-  return {slug:G.slug,title:G.title,name:G.title.toUpperCase(),tag:m.tag,kind:m.kind,c:G.color,players:G.players,
-    demo:DEMOS[G.slug],cap:G.shortDescription,how:G.rules.slice(0,2).join(' ')};
+
+var DEMOS = {
+  'rail-rush': rail,
+  'hill-climb': hill,
+  'rps': rps,
+  'scream-chicken': chick,
+  'quiz-battle': duel,
+
+  'bottle-blast': {
+    reset: function () {},
+    draw: function (t) {
+      g.fillStyle = '#10162a';
+      g.fillRect(0, 0, W, H);
+
+      for (var i = 0; i < 4; i++) {
+        var x = W * (0.2 + i * 0.2);
+        var y = H * 0.55 + Math.sin(t * 2 + i) * 12;
+
+        g.fillStyle = '#21e6a1';
+        g.fillRect(x - 9, y - 12, 18, 32);
+        g.fillRect(x - 5, y - 23, 10, 12);
+
+        g.fillStyle = '#ffcc45';
+        g.fillRect(x - 6, y - 27, 12, 5);
+      }
+
+      g.strokeStyle = '#54f6ff';
+      g.lineWidth = 2;
+      g.beginPath();
+      g.arc(W * 0.5, H * 0.45, 12, 0, Math.PI * 2);
+      g.stroke();
+    }
+  }
+};
+
+var LIST = GAMES.map(function (G) {
+  var m = INPUT_META[G.input];
+  return {
+    slug: G.slug,
+    title: G.title,
+    name: G.title.toUpperCase(),
+    tag: m.tag,
+    kind: m.kind,
+    c: G.color,
+    players: G.players,
+    demo: DEMOS[G.slug],
+    cap: G.shortDescription,
+    how: G.rules.slice(0, 2).join(' ')
+  };
 });
+
 $('#hudCount').textContent=LIST.length+' GAMES';
 
 /* ---- sound ---- */
