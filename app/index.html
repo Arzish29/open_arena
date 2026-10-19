@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07040f">
+<title>OpenArcade</title>
+<meta name="description" content="An arcade you play with your hands, your voice and your notes.">
+<script>document.documentElement.dataset.route=/^\/(index\.html)?$/.test(location.pathname)?'home':'other'</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600&family=Jersey+10&family=VT323&display=swap" rel="stylesheet">
+<style>
+/* Layout: full-bleed WebGL terrain hero with the cabinet standing on it, then two plain sections.
+   One look on purpose: a lit arcade screen in a dark room, so there is no light theme. */
+:root{
+  --bg:#07040f; --bg2:#0d0620; --line:#2f1766; --line2:#47228f;
+  --fg:#efe9ff; --soft:#cfc4f2; --mute:#9a8cc4;
+  --cyan:#19f0ff; --pink:#ff2bd6; --coin:#ffe14a; --violet:#6a2cff; --horizon:#3a0b57;
+  --f-display:"Jersey 10","Arial Narrow",Impact,sans-serif;
+  --f-body:"Chakra Petch",system-ui,sans-serif;
+  --f-crt:"VT323",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+@media (prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.55 var(--f-body);overflow-x:hidden}
+*,*::before,*::after{box-sizing:border-box}
+:focus-visible{outline:2px solid var(--coin);outline-offset:3px}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;isolation:isolate;padding-bottom:70px;
+  background:linear-gradient(#05020c 0%,#1b0638 38%,#3a0b57 50%,#12061f 100%)}
+#terrain{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:-1}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:160px;z-index:0;pointer-events:none;
+  background:linear-gradient(rgba(7,4,15,0),var(--bg))}
+.bar{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:16px;padding-block:14px}
+.bar nav{display:flex;gap:22px;flex-wrap:wrap}
+.bar a{color:var(--fg);text-decoration:none;font-weight:500;font-size:14px;padding:4px 0;border-bottom:2px solid transparent}
+.bar a:hover{border-bottom-color:var(--pink)}
+.snd{font:500 13px var(--f-body);color:var(--fg);background:rgba(7,4,15,.65);border:2px solid var(--line2);padding:6px 12px;cursor:pointer}
+.snd[aria-pressed="true"]{border-color:var(--coin);color:var(--coin)}
+.stage{position:relative;z-index:1;padding-top:6px}
+
+/* ---------- cabinet ---------- */
+.cab{--c:#19f0ff;width:min(940px,100%);margin-inline:auto}
+.marquee{position:relative;text-align:center;padding:28px 16px 18px;
+  background:linear-gradient(#32095e,#14062e);border:3px solid #000;border-radius:18px 18px 0 0;
+  box-shadow:inset 0 0 0 3px var(--line2),0 -8px 80px -6px rgba(255,43,214,.6)}
+.marquee::before,.marquee::after{content:"";position:absolute;left:16px;right:16px;height:6px;opacity:.9}
+.marquee::before{top:9px;background:radial-gradient(circle,var(--coin) 0 2px,transparent 2.5px) 0 0/18px 6px repeat-x}
+.marquee::after{bottom:7px;background:radial-gradient(circle,var(--pink) 0 2px,transparent 2.5px) 9px 0/18px 6px repeat-x}
+.marquee h1{margin:0;font:400 clamp(46px,11vw,92px)/.95 var(--f-display);letter-spacing:.03em;color:#ffe9fc;
+  text-shadow:3px 3px 0 var(--cyan),0 0 10px var(--pink),0 0 28px var(--pink),0 0 64px rgba(255,43,214,.7);
+  animation:tube 1.3s steps(1,end) both}
+.marquee p{margin:10px 0 0;font-size:15px;color:#e2d3ff}
+@keyframes tube{0%{opacity:0}8%{opacity:.9}12%{opacity:.1}18%{opacity:1}26%{opacity:.25}31%{opacity:.25}35%{opacity:1}58%{opacity:.8}62%{opacity:1}100%{opacity:1}}
+
+.bezel{background:linear-gradient(#1b0a3c,#0c0520);border:3px solid #000;border-top:0;padding:clamp(10px,2.4vw,24px);
+  box-shadow:inset 0 0 0 3px var(--line2)}
+.crt{position:relative;border-radius:28px/24px;overflow:hidden;background:#030110;
+  box-shadow:0 0 0 4px #000,0 0 0 7px #24114f,0 0 60px rgba(25,240,255,.22)}
+.crt::before{content:"";position:absolute;inset:0;z-index:5;pointer-events:none;mix-blend-mode:multiply;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,.36) 0 1px,transparent 1px 3px)}
+.crt::after{content:"";position:absolute;inset:0;z-index:6;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.7) 100%),linear-gradient(115deg,rgba(255,255,255,.07),transparent 28%)}
+.roll{position:absolute;left:0;right:0;height:22%;top:-25%;z-index:4;pointer-events:none;
+  background:linear-gradient(transparent,rgba(150,255,255,.06),transparent);animation:roll 7s linear 2.5s infinite}
+@keyframes roll{to{top:110%}}
+
+.screen{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);
+  grid-template-rows:auto 1fr auto;gap:12px 24px;padding:clamp(14px,2.6vw,26px);
+  font-family:var(--f-crt);font-size:clamp(18px,2.4vw,24px);line-height:1;color:#c9fbff;
+  text-shadow:-1px 0 rgba(255,43,214,.45),1px 0 rgba(25,240,255,.45);
+  animation:crton 1s cubic-bezier(.2,.7,.2,1) .9s both}
+@keyframes crton{
+  0%{transform:scale(.02,.004);filter:brightness(9)}
+  30%{transform:scale(1,.004);filter:brightness(7)}
+  70%{transform:scale(1,1.04);filter:brightness(2.2)}
+  100%{transform:none;filter:none}}
+.hud{grid-column:1/-1;grid-row:1;display:flex;justify-content:space-between;gap:12px;color:var(--coin)}
+.games{grid-column:1;grid-row:2;list-style:none;margin:0;padding:0;display:grid;grid-auto-rows:1fr;gap:6px;min-width:0}
+.games li{display:grid;animation:appear .5s steps(8) both;animation-delay:calc(1.7s + var(--i) * 90ms)}
+@keyframes appear{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+.games button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:.9em 1fr auto;align-items:center;gap:8px;
+  padding:6px 10px;color:var(--c);border:2px solid transparent;letter-spacing:.05em;min-width:0}
+.games button .ar{visibility:hidden}
+.games button em{font-style:normal;font-size:.62em;border:1px solid currentColor;padding:3px 5px 2px;letter-spacing:.1em}
+.games button:hover{border-color:var(--c)}
+.games button[aria-current="true"]{background:var(--c);color:#050212;text-shadow:none}
+.games button[aria-current="true"] .ar{visibility:visible}
+.games button:focus-visible{outline:2px dashed #fff;outline-offset:2px}
+.view{grid-column:2;grid-row:2;display:grid;gap:10px;align-content:start;min-width:0}
+.frame{position:relative;aspect-ratio:4/3;border:3px solid var(--c);background:#050212;
+  box-shadow:0 0 18px var(--c),inset 0 0 18px rgba(0,0,0,.6)}
+.frame.tune{animation:tune .28s steps(4)}
+@keyframes tune{0%{filter:brightness(2.5) hue-rotate(60deg)}50%{filter:brightness(.6) hue-rotate(-40deg)}100%{filter:none}}
+#demo{display:block;width:100%;height:100%;image-rendering:pixelated}
+.cap{color:var(--c);font-size:.82em;line-height:1.05;min-height:2.1em}
+.foot{grid-column:1/-1;grid-row:3;display:flex;justify-content:space-between;gap:12px;font-size:.8em;color:#8f84c4}
+.blink{color:var(--coin);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+.deck{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:clamp(14px,3vw,34px);align-items:center;
+  padding:clamp(14px,2.4vw,24px);background:linear-gradient(#170b34,#0a0418);border:3px solid #000;
+  box-shadow:inset 0 0 0 3px var(--line2);perspective:700px}
+.placard{min-width:0;padding:14px 18px 16px;border:2px solid var(--c);background:#0a0418;color:#e8defc;
+  box-shadow:0 0 22px -8px var(--c);transform-origin:50% 0}
+.placard.flip{animation:flip .35s cubic-bezier(.2,.8,.3,1)}
+@keyframes flip{from{transform:rotateX(-70deg);opacity:.2}to{transform:none;opacity:1}}
+.p-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
+.p-name{margin:0;font:400 36px/1 var(--f-display);color:var(--c);letter-spacing:.03em}
+.pill{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--c);border:1px solid var(--c);padding:2px 8px}
+.p-how{margin:8px 0 0;font-size:15px;line-height:1.5;max-width:56ch}
+.ctl{display:flex;align-items:flex-end;gap:clamp(14px,2.4vw,28px)}
+.stick{position:relative;width:86px;height:92px;flex:none;--tilt:0deg}
+.stick .plate{position:absolute;left:0;right:0;bottom:0;height:62px;border-radius:50%;
+  background:radial-gradient(circle at 50% 35%,#34196a,#120628);border:3px solid #000;box-shadow:inset 0 0 0 3px var(--line2)}
+.stick .shaft{position:absolute;left:50%;bottom:30px;width:8px;height:50px;margin-left:-4px;transform-origin:50% 100%;
+  background:linear-gradient(90deg,#8a8aa0,#fff,#6c6c80);transform:rotate(var(--tilt));transition:transform .13s cubic-bezier(.3,1.7,.5,1)}
+.stick .ball{position:absolute;left:50%;top:-22px;width:32px;height:32px;margin-left:-16px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#ffb0f3,var(--pink) 45%,#7a0f6a);box-shadow:0 0 16px rgba(255,43,214,.7)}
+.btns{display:flex;gap:14px}
+.btn{all:unset;cursor:pointer;display:grid;justify-items:center;gap:8px;font:500 12px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.btn i{display:block;width:46px;height:46px;border-radius:50%;border:3px solid #000;
+  background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.7),var(--k) 42%,rgba(0,0,0,.55) 135%),var(--k);
+  box-shadow:0 5px 0 #000,0 0 18px var(--k);transition:transform .06s,box-shadow .06s}
+.btn:active i,.btn.press i{transform:translateY(4px);box-shadow:0 1px 0 #000,0 0 10px var(--k)}
+.btn:focus-visible{outline:2px solid var(--coin);outline-offset:4px}
+.base{height:20px;background:linear-gradient(#0a0418,#000);border:3px solid #000;border-top:0;
+  box-shadow:inset 0 0 0 3px var(--line2),0 24px 80px rgba(255,43,214,.4)}
+
+/* ---------- sections ---------- */
+.sec{padding-block:clamp(56px,9vw,104px)}
+.sec.alt{background:var(--bg2);border-top:1px solid var(--line)}
+.wrap{max-width:1000px;margin-inline:auto}
+.sec-title{margin:0 0 .6em;font:400 clamp(36px,5.6vw,60px)/1 var(--f-display);letter-spacing:.015em;text-wrap:balance;max-width:20ch}
+.lede{margin:0 0 36px;max-width:60ch;color:var(--soft)}
+.modes{border-top:1px solid var(--line)}
+.mode{display:grid;grid-template-columns:84px minmax(0,1fr);gap:28px;padding:30px 0;border-bottom:1px solid var(--line);align-items:start}
+.ico{width:66px;height:auto;image-rendering:pixelated;filter:drop-shadow(0 0 8px var(--c))}
+.mode h3{margin:0 0 8px;font:400 36px/1 var(--f-display);color:var(--c);letter-spacing:.03em}
+.mode p{margin:0 0 14px;max-width:62ch;color:var(--soft)}
+.chain{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font:400 22px/1.1 var(--f-crt);color:var(--c)}
+.chain span:not(:last-child)::after{content:"\2192";margin-left:10px;color:var(--mute)}
+.picks{margin-top:14px;font-size:14px;color:var(--mute);display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.picks button{all:unset;cursor:pointer;color:var(--fg);font-weight:500;border-bottom:2px solid var(--c)}
+.picks button:hover{background:var(--c);color:#050212}
+.picks button:focus-visible{outline:2px solid var(--coin);outline-offset:3px}
+
+.flow{list-style:none;margin:48px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0 24px;counter-reset:s}
+.flow li{counter-increment:s;position:relative;padding-top:26px;border-top:2px solid var(--line2)}
+.flow li::before{content:counter(s);position:absolute;top:-16px;left:0;width:30px;height:30px;display:grid;place-items:center;
+  background:var(--coin);color:#1a0f00;font:400 24px/1 var(--f-display)}
+.flow h3{margin:0 0 6px;font:400 30px/1 var(--f-display);letter-spacing:.03em}
+.flow p{margin:0;font-size:15px;color:var(--soft)}
+.rec{margin:48px 0 0;padding:20px 22px;background:#050212;border:2px solid var(--line2);overflow-x:auto;
+  font:400 22px/1.3 var(--f-crt);color:#c9fbff;white-space:pre;box-shadow:inset 0 0 50px rgba(25,240,255,.07)}
+.rec b{font-weight:400;color:var(--coin)} .rec i{font-style:normal;color:var(--pink)}
+.cap-note{margin:10px 0 0;font-size:13px;color:var(--mute)}
+footer{border-top:1px solid var(--line);padding-block:30px 52px;color:var(--mute);font-size:14px}
+footer .row{max-width:1000px;margin-inline:auto;display:flex;justify-content:space-between;gap:12px 24px;flex-wrap:wrap}
+footer a{color:var(--fg)}
+
+@media (max-width:900px){
+  .flow{grid-template-columns:1fr;gap:0}
+  .flow li{border-top:0;border-left:2px solid var(--line2);padding:0 0 30px 28px;margin-left:15px}
+  .flow li::before{top:0;left:-16px}
+}
+@media (max-width:760px){
+  .screen{grid-template-columns:1fr}
+  .view{grid-column:1;grid-row:2}
+  .games{grid-column:1;grid-row:3;grid-template-columns:1fr 1fr;grid-auto-rows:auto}
+  .games button em{display:none}
+  .foot{grid-row:4}
+  .deck{grid-template-columns:1fr;justify-items:stretch}
+  .ctl{justify-content:center}
+  .mode{grid-template-columns:1fr;gap:14px}
+  .ico{width:54px}
+}
+@media (prefers-reduced-motion:reduce){
+  .screen,.marquee h1,.roll,.blink,.games li,.frame.tune,.placard.flip{animation:none!important}
+}
+/* ---------- routing: only the landing route shows the cabinet ---------- */
+html:not([data-route="home"]) #landing{display:none}
+</style>
+</head>
+<body>
+<div id="landing">
+<header class="hero" id="hero">
+  <canvas id="terrain" aria-hidden="true"></canvas>
+  <div class="gut bar">
+    <nav aria-label="On this page">
+      <a href="#modes">Controls</a>
+      <a href="#engine">Quiz engine</a>
+    </nav>
+    <button class="snd" id="snd" type="button" aria-pressed="false">Sound off</button>
+  </div>
+
+  <div class="gut stage">
+    <div class="cab" id="cab">
+      <div class="marquee">
+        <h1>OpenArcade</h1>
+        <p>Play with your hands, your voice and your notes.</p>
+      </div>
+
+      <div class="bezel">
+        <div class="crt" id="crt">
+          <div class="roll"></div>
+          <div class="screen" id="screen">
+            <div class="hud"><span id="hudCount">5 GAMES</span><span id="hudHi">HI-SCORE NONE YET</span><span>FREE PLAY</span></div>
+            <ul class="games" id="games" aria-label="Choose a game"></ul>
+            <div class="view">
+              <div class="frame" id="frame"><canvas id="demo" width="256" height="192" role="img" aria-label="Game preview"></canvas></div>
+              <div class="cap" id="cap"></div>
+            </div>
+            <div class="foot"><span>ARROWS CHOOSE</span><span class="blink" id="hint">PRESS START</span><span>NO COINS NEEDED</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="deck">
+        <div class="placard" id="placard" aria-live="polite">
+          <div class="p-top"><p class="p-name" id="pName"></p><span class="pill" id="pPill"></span></div>
+          <p class="p-how" id="pHow"></p>
+        </div>
+        <div class="ctl">
+          <div class="stick" id="stick" aria-hidden="true"><div class="plate"></div><div class="shaft"><div class="ball"></div></div></div>
+          <div class="btns">
+            <button class="btn" id="bPrev" type="button" style="--k:#19f0ff" aria-label="Previous game"><i></i>Prev</button>
+            <button class="btn" id="bStart" type="button" style="--k:#ffe14a" aria-label="Start"><i></i>Start</button>
+            <button class="btn" id="bNext" type="button" style="--k:#ff2bd6" aria-label="Next game"><i></i>Next</button>
+          </div>
+        </div>
+      </div>
+      <div class="base"></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="sec" id="modes">
+    <div class="gut"><div class="wrap">
+      <h2 class="sec-title">Three ways to control a game</h2>
+      <p class="lede">Every game in the cabinet uses one of these. Pick a game below and the screen jumps to it.</p>
+      <div class="modes">
+        <article class="mode" style="--c:#19f0ff">
+          <canvas class="ico" data-ico="hand" data-c="#19f0ff" width="11" height="11" aria-hidden="true"></canvas>
+          <div>
+            <h3>Your hands</h3>
+            <p>The webcam feeds a hand-landmark model that returns 21 points per hand. We turn those points into poses: open palm, fist, peace sign and pointing finger. The pose and where your hand sits in the frame become the game input.</p>
+            <div class="chain"><span>webcam</span><span>hand landmarks</span><span>pose</span><span>game input</span></div>
+            <div class="picks">Games <button type="button" data-pick="rail-rush">Rail Rush</button><button type="button" data-pick="hill-climb">Hill Climb</button><button type="button" data-pick="rps">Rock Paper Scissors</button></div>
+          </div>
+        </article>
+        <article class="mode" style="--c:#ff2bd6">
+          <canvas class="ico" data-ico="mic" data-c="#ff2bd6" width="9" height="12" aria-hidden="true"></canvas>
+          <div>
+            <h3>Your voice</h3>
+            <p>The microphone measures how loud you are. A short calibration learns how quiet the room is, then your volume becomes the input: quiet stands still, talking walks, shouting jumps.</p>
+            <div class="chain"><span>microphone</span><span>loudness</span><span>game input</span></div>
+            <div class="picks">Games <button type="button" data-pick="scream-chicken">Scream Chicken</button></div>
+          </div>
+        </article>
+        <article class="mode" style="--c:#ffe14a">
+          <canvas class="ico" data-ico="doc" data-c="#ffe14a" width="9" height="12" aria-hidden="true"></canvas>
+          <div>
+            <h3>Your notes</h3>
+            <p>Retrieval-augmented generation (RAG) lets the quiz use your own material. Paste lecture notes or upload a PDF, and an LLM writes questions from the passages it finds, with the page each one came from.</p>
+            <div class="chain"><span>notes</span><span>passages</span><span>embeddings</span><span>retrieval</span><span>LLM</span><span>question</span></div>
+            <div class="picks">Games <button type="button" data-pick="quiz-battle">AI Quiz Battle</button></div>
+          </div>
+        </article>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="sec alt" id="engine">
+    <div class="gut"><div class="wrap">
+      <h2 class="sec-title">How a quiz question gets written</h2>
+      <p class="lede">AI Quiz Battle writes every question this way. This is what runs between your upload and the first question.</p>
+      <ol class="flow">
+        <li><h3>Upload</h3><p>Notes, slides or a PDF go in.</p></li>
+        <li><h3>Split</h3><p>The text is cut into passages of about 200 words with a small overlap.</p></li>
+        <li><h3>Embed</h3><p>Each passage becomes a vector and goes into the index.</p></li>
+        <li><h3>Retrieve</h3><p>The chosen topic is embedded the same way. The closest passages come back.</p></li>
+        <li><h3>Write</h3><p>The LLM writes a question and four options from those passages and names the page it used.</p></li>
+      </ol>
+      <pre class="rec" tabindex="0" aria-label="Example of one retrieved question"><i>topic</i>      "chunking"
+<i>retrieved</i>  notes_week3.pdf   p.4   <b>0.83</b>
+           notes_week3.pdf   p.5   <b>0.79</b>
+           rag_slides.pptx   s.11  <b>0.74</b>
+<i>question</i>   Why split documents into passages before embedding?
+<i>answer</i>     B  Short passages match a question more precisely
+<i>cited</i>      notes_week3.pdf p.4</pre>
+      <p class="cap-note">One question as the engine returns it. The numbers are retrieval scores.</p>
+    </div></div>
+  </section>
+</main>
+
+<footer class="gut">
+  <div class="row">
+    <span>OpenArcade is our team project from the training: computer vision, RAG, chatbots and LLMs.</span>
+    <a href="#hero">Back to the cabinet</a>
+  </div>
+</footer>
+</div>
+
+<div id="app"></div>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
