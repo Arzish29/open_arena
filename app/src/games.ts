@@ -164,8 +164,8 @@ export const GAMES: Game[] = [
     ],
     controls: [
       'Keys 1 to 4 or a click: choose an answer',
-      'Optional: point with your index finger and hold for 1 second to choose',
-      'Two players: player 1 uses 1 to 4, player 2 uses 7 to 0',
+      'Two players: player 1 uses 1 to 4, player 2 uses 7, 8, 9 and 0',
+      'Space or Enter: skip to the next question after the answer is shown',
     ],
     scoring: 'Your score is the damage you dealt plus a bonus for the HP you have left.',
     tips: [

@@ -20,6 +20,7 @@ html.is-play body {
   position: relative;
   width: min(100vw, calc(100dvh * 16 / 9));
   aspect-ratio: 16 / 9;
+  container-type: inline-size;
   overflow: hidden;
   background: #050212;
   box-shadow: 0 0 0 1px #1a0c38, 0 0 60px -20px var(--c);
